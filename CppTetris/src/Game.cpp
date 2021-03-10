@@ -1,7 +1,10 @@
 #include "Game.h"
 #include "Log.h"
 
-Game::Game(const char* title, int windows_width, int windows_height)
+#include "Common/Util.h"
+#include "Tetromino.h"
+
+Game::Game(std::string title, int windows_width, int windows_height)
 {
 	LOG_INFO("Initializing SDL");
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -10,9 +13,10 @@ Game::Game(const char* title, int windows_width, int windows_height)
 	
 
 	LOG_INFO("Creating Window");
-	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windows_width, windows_height, SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windows_width, windows_height, SDL_WINDOW_OPENGL);
 	LOG_INFO("Creating Renderer");
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	renderer = Renderer::GetInstance();
+	renderer->CreateRenderer(window);
 
 	current_piece = new Piece();
 	ghost_piece = new Piece();
@@ -23,8 +27,9 @@ Game::Game(const char* title, int windows_width, int windows_height)
 
 Game::~Game()
 {
-	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+
+	SDL_ShowCursor(SDL_DISABLE);
 
 	SDL_Quit();
 }
@@ -130,17 +135,17 @@ void Game::Update()
 
 void Game::Render()
 {
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(renderer);
+	
+	renderer->Clear();
 
 	// draw ghost piece
-	DrawTetromino(ghost_piece->transform.position.x, ghost_piece->transform.position.y, 30, &ghost_piece->piece, ghost_piece->piece.color);
+	DrawTetromino(ghost_piece->transform.position.x, ghost_piece->transform.position.y, 30, &ghost_piece->piece, ghost_piece->piece.GetColor());
 	// draw real piece
-	DrawTetromino(current_piece->transform.position.x, current_piece->transform.position.y, 30, &current_piece->piece, current_piece->piece.color);
+	DrawTetromino(current_piece->transform.position.x, current_piece->transform.position.y, 30, &current_piece->piece, current_piece->piece.GetColor());
 	// draw board
 	DrawBoard(30, board);
 
-	SDL_RenderPresent(renderer);
+	renderer->Present();
 }
 
 void Game::DropPiece(Piece& piece)
@@ -161,7 +166,7 @@ void Game::SoftDrop(Piece& piece)
 
 void Game::DrawTetromino(int x, int y, uint8_t width, Tetromino* tetromino, Color color)
 {
-	uint8_t side = tetromino->side;
+	uint8_t side = tetromino->GetSide();
 
 	for (uint8_t row = 0; row < side; row++)
 	{
@@ -174,19 +179,7 @@ void Game::DrawTetromino(int x, int y, uint8_t width, Tetromino* tetromino, Colo
 			int xPos = x * width + col * width;
 			int yPos = y * width + row * width;
 
-			DrawBlock(xPos, yPos, width, width, color);
-		}
-	}
-}
-
-void Game::DrawBlock(int x, int y, uint8_t width, uint8_t height, Color color)
-{
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	for (int row = 0; row < height; row++)
-	{
-		for (int col = 0; col < width; col++)
-		{
-			SDL_RenderDrawPoint(renderer, x + col, y + row);
+			renderer->DrawSquare(xPos, yPos, width, width, color);
 		}
 	}
 }
@@ -196,9 +189,7 @@ void Game::SetRandomPiece(Piece* piece)
 	int x = board_width / 2 - 1;
 	int y = 1;
 
-	srand(time(NULL));
-
-	int randomIndex = rand() % 7;
+	int randomIndex = Util::Random(7);
 
 	Tetromino tetr = Tetromino::tetrominoList[randomIndex];
 
@@ -222,7 +213,7 @@ void Game::DrawBoard(uint8_t width, const uint8_t* board)
 
 			Color color(255, 255, 255, 255);
 
-			DrawBlock(xPos, yPos, width, width, color);
+			renderer->DrawSquare(xPos, yPos, width, width, color);
 		}
 	}
 }
@@ -235,7 +226,7 @@ void Game::SetGhostPiece(Piece* ghost_piece, Piece& copy_piece)
 	Tetromino data = copy_piece.piece;
 
 	// change the color of the piece
-	data.color = Color::GREY;
+	data.GetColor() = Color::GREY;
 
 	Piece gost_piece_copy(x, y, data);
 
@@ -252,7 +243,7 @@ void Game::SetGhostPiece(Piece* ghost_piece, Piece& copy_piece)
 
 bool Game::CheckCollision(Piece piece)
 {
-	uint8_t side = piece.piece.side;
+	uint8_t side = piece.piece.GetSide();
 	Tetromino tetromino = piece.piece;
 
 	for (uint8_t row = 0; row < side; row++)
@@ -338,9 +329,9 @@ void Game::MoveLineDown(uint8_t* board, uint8_t row_limit)
 void Game::AddPieceToBoard(Piece& piece)
 {
 	Tetromino tetromino = piece.piece;
-	for (int row = 0; row < tetromino.side; row++)
+	for (int row = 0; row < tetromino.GetSide(); row++)
 	{
-		for (int col = 0; col < tetromino.side; col++)
+		for (int col = 0; col < tetromino.GetSide(); col++)
 		{
 			uint8_t block = tetromino.GetTetromino(row, col);
 
@@ -364,4 +355,3 @@ void Game::ClearLines()
 	// remove lines at a certain row value
 	// move everything above that row up to that line
 }
-

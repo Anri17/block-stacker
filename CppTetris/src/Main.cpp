@@ -9,11 +9,11 @@
 
 int main(int argc, char** argv)
 {
-	const char* title = "Tetris";
+	std::string title = "Tetris";
 
 	LOG_INFO("Application Start");
 
-	Game* game = new Game(title, WINDOW_WIDTH+ 100, WINDOW_HEIGHT + 100);
+	Game* game = new Game(title, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	delete game;
 

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -26,8 +27,11 @@
     <ClCompile Include="src\Tetromino.cpp" />
     <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\Vector2.cpp" />
+    <ClCompile Include="src\TetrominoBlock.cpp" />
+    <ClCompile Include="src\Common\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Log.h" />
@@ -35,6 +39,8 @@
     <ClInclude Include="src\Tetromino.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\Vector2.h" />
+    <ClInclude Include="src\TetrominoBlock.h" />
+    <ClInclude Include="src\Common\Util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -91,29 +97,29 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\vclib\SDL2\include;C:\vclib\SDL2_image\include;C:\vclib\SDL2_ttf\include;C:\vclib\SDL2_mixer\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\vclib\SDL2\lib\x86;C:\vclib\SDL2_image\lib\x86;C:\vclib\SDL2_mixer\lib\x86;C:\vclib\SDL2_ttf\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\dependencies\SDL2\include;$(SolutionDir)\dependencies\SDL2_image\include;$(SolutionDir)\dependencies\SDL2_ttf\include;$(SolutionDir)\dependencies\SDL2_mixer\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\dependencies\SDL2\lib\x86;$(SolutionDir)\dependencies\SDL2_image\lib\x86;$(SolutionDir)\dependencies\SDL2_mixer\lib\x86;$(SolutionDir)\dependencies\SDL2_ttf\lib\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\x86\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin-int\x86\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\vclib\SDL2\include;C:\vclib\SDL2_image\include;C:\vclib\SDL2_ttf\include;C:\vclib\SDL2_mixer\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\vclib\SDL2\lib\x86;C:\vclib\SDL2_image\lib\x86;C:\vclib\SDL2_mixer\lib\x86;C:\vclib\SDL2_ttf\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\dependencies\SDL2\include;$(SolutionDir)\dependencies\SDL2_image\include;$(SolutionDir)\dependencies\SDL2_ttf\include;$(SolutionDir)\dependencies\SDL2_mixer\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\dependencies\SDL2\lib\x86;$(SolutionDir)\dependencies\SDL2_image\lib\x86;$(SolutionDir)\dependencies\SDL2_mixer\lib\x86;$(SolutionDir)\dependencies\SDL2_ttf\lib\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\x86\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin-int\x86\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\vclib\SDL2\include;C:\vclib\SDL2_image\include;C:\vclib\SDL2_ttf\include;C:\vclib\SDL2_mixer\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\vclib\SDL2_mixer\lib\x64;C:\vclib\SDL2_ttf\lib\x64;C:\vclib\SDL2\lib\x64;C:\vclib\SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\dependencies\SDL2\include;$(SolutionDir)\dependencies\SDL2_image\include;$(SolutionDir)\dependencies\SDL2_ttf\include;$(SolutionDir)\dependencies\SDL2_mixer\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\dependencies\SDL2_mixer\lib\x64;$(SolutionDir)\dependencies\SDL2_ttf\lib\x64;$(SolutionDir)\dependencies\SDL2\lib\x64;$(SolutionDir)\dependencies\SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\x64\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin-int\x64\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\vclib\SDL2\include;C:\vclib\SDL2_image\include;C:\vclib\SDL2_ttf\include;C:\vclib\SDL2_mixer\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\vclib\SDL2_mixer\lib\x64;C:\vclib\SDL2_ttf\lib\x64;C:\vclib\SDL2\lib\x64;C:\vclib\SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\dependencies\SDL2\include;$(SolutionDir)\dependencies\SDL2_image\include;$(SolutionDir)\dependencies\SDL2_ttf\include;$(SolutionDir)\dependencies\SDL2_mixer\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\dependencies\SDL2_mixer\lib\x64;$(SolutionDir)\dependencies\SDL2_ttf\lib\x64;$(SolutionDir)\dependencies\SDL2\lib\x64;$(SolutionDir)\dependencies\SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\x64\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin-int\x64\$(Configuration)\</IntDir>
   </PropertyGroup>

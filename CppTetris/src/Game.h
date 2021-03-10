@@ -1,17 +1,18 @@
 #pragma once
 
 #include <SDL.h>
-#include <chrono>
 #include "Piece.h"
-#include "Tetromino.h"
 
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 22
 
+
+#include "Renderer.h"
+
 class Game
 {
 public:
-	Game(const char* title, int windows_width, int windows_height);
+	Game(std::string title, int windows_width, int windows_height);
 	~Game();
 	void Run();
 private:
@@ -20,7 +21,7 @@ private:
 	void Render();
 	// game loop and SDL variables
 	SDL_Window* window;
-	SDL_Renderer* renderer;
+	Renderer* renderer;
 	SDL_Event e;
 	bool game_over;
 	// game variables
@@ -35,7 +36,6 @@ private:
 	void DropPiece(Piece& piece);
 	void SoftDrop(Piece& piece);
 	void DrawTetromino(int x, int y, uint8_t width, Tetromino* tetromino, Color color);
-	void DrawBlock(int x, int y, uint8_t width, uint8_t height, Color color);
 	void SetRandomPiece(Piece* piece);
 	void DrawBoard(uint8_t width, const uint8_t* board);
 	void ClearLine(uint8_t* board);

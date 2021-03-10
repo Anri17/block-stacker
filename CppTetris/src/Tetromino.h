@@ -1,19 +1,13 @@
 #pragma once
-#ifndef TETROMINO_H
-#define TETROMINO_H
-
-#include <vector>
 
 #include "Color.h"
 
-struct Tetromino
+class Tetromino
 {
+public:
 	Tetromino();
 	Tetromino(uint8_t* data, uint8_t side, Color color);
-	uint8_t* data;
-	uint8_t side;
 	uint8_t rotation;
-	Color color;
 	static Tetromino tetrominoList[7];
 	uint8_t GetTetromino(uint8_t row, uint8_t col);
 	static uint8_t J_data[];
@@ -23,6 +17,10 @@ struct Tetromino
 	static uint8_t I_data[];
 	static uint8_t S_data[];
 	static uint8_t Z_data[];
+	inline uint8_t GetSide() const { return side; }
+	inline Color GetColor() const { return color; }
+private:
+	uint8_t* data;
+	uint8_t side;
+	Color color;
 };
-
-#endif // TETROMINO_H

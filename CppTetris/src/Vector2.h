@@ -1,7 +1,8 @@
 #pragma once
 
-struct Vector2
+class Vector2
 {
+public:
 	int x;
 	int y;
 	Vector2();
