@@ -4,22 +4,34 @@
 #include "Common/Util.h"
 #include "Tetromino.h"
 
-Game::Game(std::string title, int windows_width, int windows_height)
+enum Scenes {
+	MAIN_GAME = 0,
+	MAIN_MENU = 1,
+	PAUSE_MENU = 2
+};
+
+Game::Game(std::string title, int windows_width, int windows_height) : 
+	Application(title, windows_width, windows_height)
 {
-	LOG_INFO("Initializing SDL");
-	SDL_Init(SDL_INIT_EVERYTHING);
+	game_scene = MAIN_MENU;
 
 	game_over = false;
-	
-
-	LOG_INFO("Creating Window");
-	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windows_width, windows_height, SDL_WINDOW_OPENGL);
-	LOG_INFO("Creating Renderer");
-	renderer = Renderer::GetInstance();
-	renderer->CreateRenderer(window);
 
 	current_piece = new Piece();
 	ghost_piece = new Piece();
+
+	current_fps = 0;
+
+	TTF_Init();
+
+	font = TTF_OpenFont("D:\\Projects\\CppTetris\\bin\\x64\\Debug\\DIOGENES.ttf", 20);
+
+	if (!font) {
+		LOG_ERROR(TTF_GetError());
+		// handle error
+	}
+
+	testTexture = new Texture(0, 0, 10, 10, "test.png");
 
 	LOG_INFO("Run Game");
 	this->Run();
@@ -27,11 +39,10 @@ Game::Game(std::string title, int windows_width, int windows_height)
 
 Game::~Game()
 {
-	SDL_DestroyWindow(window);
+	TTF_CloseFont(font);
+	TTF_Quit();
 
-	SDL_ShowCursor(SDL_DISABLE);
-
-	SDL_Quit();
+	delete testTexture;
 }
 
 void Game::Run()
@@ -56,34 +67,69 @@ void Game::Run()
 				game_over = true;
 			}
 
-			Piece current_piece_copy = *current_piece;
+			current_piece_copy = *current_piece;
 
 			if (e.type == SDL_KEYDOWN)
 			{
-				switch (e.key.keysym.sym)
+				if (game_scene == MAIN_GAME)
 				{
-				case SDLK_ESCAPE:
-					game_over = true;
-					break;
-				case SDLK_UP:
-					current_piece_copy.piece.rotation = (current_piece_copy.piece.rotation + 1) % 4;
-					howLongHasPassed = 0;
-					break;
-				case SDLK_LEFT:
-					current_piece_copy.transform.position.x--;
-					break;
-				case SDLK_RIGHT:
-					current_piece_copy.transform.position.x++;
-					break;
-				case SDLK_DOWN:
-					DropPiece(current_piece_copy);
-					howLongHasPassed = 0;
-					break;
-				case SDLK_SPACE:
-					int lowestY = ghost_piece->transform.position.y;
-					current_piece_copy.transform.position.y = lowestY;
-					howLongHasPassed = howLongToWait;
-					break;
+					// Main Game Controls
+					switch (e.key.keysym.sym)
+					{
+					case SDLK_ESCAPE:
+						game_scene = PAUSE_MENU;
+						break;
+					case SDLK_UP:
+						current_piece_copy.piece.rotation = (current_piece_copy.piece.rotation + 1) % 4;
+						howLongHasPassed = 0;
+						break;
+					case SDLK_LEFT:
+						current_piece_copy.transform.position.x--;
+						break;
+					case SDLK_RIGHT:
+						current_piece_copy.transform.position.x++;
+						break;
+					case SDLK_DOWN:
+						DropPiece(current_piece_copy);
+						howLongHasPassed = 0;
+						break;
+					case SDLK_SPACE:
+						int lowestY = ghost_piece->transform.position.y;
+						current_piece_copy.transform.position.y = lowestY;
+						howLongHasPassed = howLongToWait;
+						break;
+					}
+				}
+				else if (game_scene == MAIN_MENU)
+				{
+					// Main Menu Controls
+					switch (e.key.keysym.sym)
+					{
+					case SDLK_n:
+						ResetGame();
+						game_scene = MAIN_GAME;
+						break;
+					case SDLK_q:
+						game_over = true;
+						break;
+					}
+				}
+				else if (game_scene == PAUSE_MENU)
+				{
+					// Pause Menu Controls
+					switch (e.key.keysym.sym)
+					{
+					case SDLK_ESCAPE:
+						game_scene = MAIN_GAME;
+						break;
+					case SDLK_n:
+						ResetGame();
+						game_scene = MAIN_GAME;
+						break;
+					case SDLK_q:
+						game_over = true;
+						break;
+					}
 				}
 			}
 
@@ -100,34 +146,40 @@ void Game::Run()
 
 		if (frameDelay > frameTime)	// delay frame time
 		{
-			SDL_Delay(frameDelay - frameTime);
+			SDL_Delay(frameDelay - (float)frameTime);
 		}
+
+#ifdef _DEBUG
+		current_fps = (int)maxFPS - frameTime;
+#endif
 	}
 }
 
 void Game::Update()
 {
-	SetGhostPiece(ghost_piece, *current_piece);
-
-	Piece current_piece_copy = *current_piece;
-	SoftDrop(current_piece_copy);
-
-	if (!CheckCollision(current_piece_copy))
+	if (game_scene == MAIN_GAME)
 	{
-		*current_piece = current_piece_copy;
-	}
-	else
-	{
-		AddPieceToBoard(*current_piece);
-
-		// clear all existing lines
-		ClearLines();
-
-		SetRandomPiece(current_piece);
 		SetGhostPiece(ghost_piece, *current_piece);
-		if (CheckCollision(*current_piece)) game_over = true;		// since the new piece collides with the board, it's game over and the game ends
-	}
 
+		Piece current_piece_copy = *current_piece;
+		SoftDrop(current_piece_copy);
+
+		if (!CheckCollision(current_piece_copy))
+		{
+			*current_piece = current_piece_copy;
+		}
+		else
+		{
+			AddPieceToBoard(*current_piece);
+
+			// clear all existing lines
+			ClearLines();
+
+			SetRandomPiece(current_piece);
+			SetGhostPiece(ghost_piece, *current_piece);
+			if (CheckCollision(*current_piece)) game_scene = MAIN_MENU;		// since the new piece collides with the board, it's game over and the game ends
+		}
+	}
 	// check if the piece is colliding with the bottom
 	// add that piece to an array of lines that are to be calculated.
 	// Also check for collision with that array of lines
@@ -135,17 +187,40 @@ void Game::Update()
 
 void Game::Render()
 {
-	
-	renderer->Clear();
+	_renderer->Clear();
+		
+	if (game_scene == MAIN_GAME)
+	{
+		// draw ghost piece
+		DrawTetromino(ghost_piece->transform.position.x, ghost_piece->transform.position.y, 30, &ghost_piece->piece, ghost_piece->piece.GetColor());
+		// draw real piece
+		DrawTetromino(current_piece->transform.position.x, current_piece->transform.position.y, 30, &current_piece->piece, current_piece->piece.GetColor());
+		// draw board
+		DrawBoard(30, board);
+	}
+	else if (game_scene == MAIN_MENU)
+	{
+		_renderer->DrawSquare(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Color::GREY);
 
-	// draw ghost piece
-	DrawTetromino(ghost_piece->transform.position.x, ghost_piece->transform.position.y, 30, &ghost_piece->piece, ghost_piece->piece.GetColor());
-	// draw real piece
-	DrawTetromino(current_piece->transform.position.x, current_piece->transform.position.y, 30, &current_piece->piece, current_piece->piece.GetColor());
-	// draw board
-	DrawBoard(30, board);
+		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 160, font, "N - New Game", Color::BLACK);
+		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 120, font, "Q - Quit", Color::BLACK);
+	}
+	else if (game_scene == PAUSE_MENU)
+	{
+		_renderer->DrawSquare(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Color::GREY);
 
-	renderer->Present();
+		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 160, font, "ESQ - Resume", Color::BLACK);
+		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 120, font, "N - New Game", Color::BLACK);
+		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 80, font, "Q - Quit", Color::BLACK);
+	}
+
+
+#ifdef _DEBUG
+	// draw FPS
+	DrawFPS();
+#endif
+
+	_renderer->Present();
 }
 
 void Game::DropPiece(Piece& piece)
@@ -179,7 +254,7 @@ void Game::DrawTetromino(int x, int y, uint8_t width, Tetromino* tetromino, Colo
 			int xPos = x * width + col * width;
 			int yPos = y * width + row * width;
 
-			renderer->DrawSquare(xPos, yPos, width, width, color);
+			_renderer->DrawSquare(xPos, yPos, width, width, color);
 		}
 	}
 }
@@ -213,9 +288,21 @@ void Game::DrawBoard(uint8_t width, const uint8_t* board)
 
 			Color color(255, 255, 255, 255);
 
-			renderer->DrawSquare(xPos, yPos, width, width, color);
+			_renderer->DrawSquare(xPos, yPos, width, width, color);
 		}
 	}
+}
+
+void Game::DrawFPS()
+{
+	/* Display FPS */
+	std::string fps_text = "FPS: " + std::to_string(current_fps);
+	
+	_renderer->DrawText(0, 0, font, fps_text, Color::WHITE);
+
+	_renderer->DrawText(0, 20, font, "Honestly, idk if I'm", Color::WHITE);
+	_renderer->DrawText(0, 40, font, "calculating the fps correctly.", Color::WHITE);
+	_renderer->DrawText(0, 60, font, "Don\'t take it seriously.", Color::WHITE);
 }
 
 void Game::SetGhostPiece(Piece* ghost_piece, Piece& copy_piece)
@@ -282,6 +369,7 @@ uint8_t Game::GetMatrix(uint8_t* data, uint8_t width, uint8_t row, uint8_t col)
 bool Game::IsFullLine(uint8_t* board, uint8_t row)
 {
 	bool is_full = true;
+
 	for (int col = 0; col < board_width; col++)
 	{
 		if (board[row * board_width + col] == 1)
@@ -294,6 +382,7 @@ bool Game::IsFullLine(uint8_t* board, uint8_t row)
 			break;
 		}
 	}
+
 	return is_full;
 }
 
@@ -341,6 +430,22 @@ void Game::AddPieceToBoard(Piece& piece)
 			}
 		}
 	}
+}
+
+void Game::ResetGame()
+{
+	// clear all lines
+	for (int row = 0; row < BOARD_HEIGHT; row++)
+	{
+		for (int col = 0; col < BOARD_WIDTH; col++)
+		{
+			board[row * board_width + col] = 0;
+		}
+	}
+
+	// reset player piece position
+	SetRandomPiece(current_piece);
+	SetRandomPiece(&current_piece_copy);
 }
 
 void Game::ClearLines()

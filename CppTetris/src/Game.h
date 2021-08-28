@@ -3,13 +3,22 @@
 #include <SDL.h>
 #include "Piece.h"
 
+#include <SDL_ttf.h>
+
+#define WINDOW_WIDTH 300
+#define WINDOW_HEIGHT 720
+
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 22
 
+#include <string>
+
+#include "Application.h"
 
 #include "Renderer.h"
+#include "Texture.h"
 
-class Game
+class Game : public Application
 {
 public:
 	Game(std::string title, int windows_width, int windows_height);
@@ -20,8 +29,6 @@ private:
 	void Update();
 	void Render();
 	// game loop and SDL variables
-	SDL_Window* window;
-	Renderer* renderer;
 	SDL_Event e;
 	bool game_over;
 	// game variables
@@ -38,6 +45,7 @@ private:
 	void DrawTetromino(int x, int y, uint8_t width, Tetromino* tetromino, Color color);
 	void SetRandomPiece(Piece* piece);
 	void DrawBoard(uint8_t width, const uint8_t* board);
+	void DrawFPS();
 	void ClearLine(uint8_t* board);
 	void SetGhostPiece(Piece* ghost_piece, Piece& copy_piece);
 	bool CheckCollision(Piece piece);
@@ -45,5 +53,11 @@ private:
 	bool IsFullLine(uint8_t* board, uint8_t row);
 	void MoveLineDown(uint8_t* board, uint8_t row_limit);
 	void AddPieceToBoard(Piece& piece);
+	void ResetGame();
 	void ClearLines();
+	TTF_Font* font;
+	int current_fps;
+	int game_scene;
+	Texture* testTexture;
+	Piece current_piece_copy;
 };
