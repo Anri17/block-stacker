@@ -1,2 +1,3 @@
-# CppTetris
-This is a tetris game I created to learn c++.
+# block-stacker
+
+This is a tetris clone game I created to learn c++.
