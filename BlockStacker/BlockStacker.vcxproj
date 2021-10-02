@@ -50,9 +50,9 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{caa200a8-1507-4f21-a3d2-14e63f2b5ab0}</ProjectGuid>
-    <RootNamespace>CppTetris</RootNamespace>
+    <RootNamespace>BlockStacker</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>CppTetris</ProjectName>
+    <ProjectName>BlockStacker</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
