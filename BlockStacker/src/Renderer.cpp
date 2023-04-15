@@ -60,6 +60,7 @@ void Renderer::DrawText(int x, int y, TTF_Font* font, std::string text, Color co
 	SDL_FreeSurface(textSurface);
 
 	SDL_RenderCopy(_renderer, fps_texture, NULL, &texture_rect);
+	SDL_DestroyTexture(fps_texture);
 }
 
 void Renderer::CreateRenderer(SDL_Window* window)

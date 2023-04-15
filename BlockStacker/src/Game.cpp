@@ -203,7 +203,7 @@ void Game::Render()
 	}
 	else if (game_scene == MAIN_MENU)
 	{
-		_renderer->DrawSquare(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Color::GREY);
+ 		_renderer->DrawSquare(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Color::GREY);
 
 		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 160, font, "N - New Game", Color::BLACK);
 		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 120, font, "Q - Quit", Color::BLACK);
