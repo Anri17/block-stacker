@@ -23,8 +23,11 @@ Game::Game(std::string title, int windows_width, int windows_height) :
 	current_fps = 0;
 
 	TTF_Init();
-
-	font = TTF_OpenFont("D:\\Projects\\CppTetris\\bin\\x64\\Debug\\DIOGENES.ttf", 20);
+	std::string basepath = SDL_GetBasePath();
+	std::string fontname = "DIOGENES.ttf";
+	std::string fontpath = basepath + fontname;
+	int fontsize = 20;
+	font = TTF_OpenFont(fontpath.c_str(), fontsize);
 
 	if (!font) {
 		LOG_ERROR(TTF_GetError());
