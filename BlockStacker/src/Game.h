@@ -18,6 +18,15 @@
 #include "Renderer.h"
 #include "Texture.h"
 
+struct Button {
+	int x, y;
+	int w, h;
+	Color color_base;
+	Color color_hover;
+	std::string label;
+	bool is_hover;
+};
+
 class Game : public Application
 {
 public:
@@ -25,6 +34,9 @@ public:
 	~Game();
 	void Run();
 private:
+	// scene UI
+	Button button_quit;
+	int mouse_x, mouse_y;
 	// methods
 	void Update();
 	void Render();

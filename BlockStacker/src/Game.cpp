@@ -36,6 +36,17 @@ Game::Game(std::string title, int windows_width, int windows_height) :
 
 	testTexture = new Texture(0, 0, 10, 10, "test.png");
 
+	// set button
+	button_quit.x = (windows_width / 2) - 20;
+	button_quit.w = 40;
+	button_quit.y = 100;
+	button_quit.h = 20;
+	button_quit.color_base = Color(196, 128, 0, 255);
+	button_quit.color_hover = Color(255, 196, 0, 255);
+	button_quit.is_hover = false;
+	button_quit.label = "Quit";
+
+
 	LOG_INFO("Run Game");
 	this->Run();
 }
@@ -160,6 +171,14 @@ void Game::Run()
 
 void Game::Update()
 {
+	SDL_GetMouseState(&mouse_x, &mouse_y);
+	if (game_scene == MAIN_MENU) {
+		if (mouse_x >= button_quit.x && mouse_x <= button_quit.x + button_quit.w &&
+			mouse_y >= button_quit.y && mouse_y <= button_quit.y + button_quit.h) {
+			button_quit.is_hover = true;
+		} else 
+			button_quit.is_hover = false;
+	}
 	if (game_scene == MAIN_GAME)
 	{
 		SetGhostPiece(&ghost_piece, current_piece);
@@ -207,6 +226,15 @@ void Game::Render()
 
 		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 160, font, "N - New Game", Color::BLACK);
 		_renderer->DrawText((WINDOW_WIDTH / 2) - 60, (WINDOW_HEIGHT / 2) - 120, font, "Q - Quit", Color::BLACK);
+		
+		// button
+		if (button_quit.is_hover) {
+			_renderer->DrawSquare(button_quit.x, button_quit.y, button_quit.w, button_quit.h, button_quit.color_hover);
+		}
+		else {
+			_renderer->DrawSquare(button_quit.x, button_quit.y, button_quit.w, button_quit.h, button_quit.color_base);
+		}
+		_renderer->DrawText(button_quit.x + 10, button_quit.y, font, button_quit.label, Color::WHITE);
 	}
 	else if (game_scene == PAUSE_MENU)
 	{
