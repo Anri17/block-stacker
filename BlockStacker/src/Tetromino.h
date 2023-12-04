@@ -19,6 +19,7 @@ public:
 	static uint8_t Z_data[];
 	inline uint8_t GetSide() const { return side; }
 	inline Color GetColor() const { return color; }
+	inline void SetColor(const Color color) { this->color = color; }
 private:
 	uint8_t* data;
 	uint8_t side;

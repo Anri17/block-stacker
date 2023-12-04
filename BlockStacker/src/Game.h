@@ -32,27 +32,28 @@ private:
 	SDL_Event e;
 	bool game_over;
 	// game variables
-	Piece* current_piece;
-	Piece* ghost_piece;
+	Piece current_piece;
+	Piece ghost_piece;
 	float howLongToWait = 60;		// This is how many frames to wait until the piece is to be dropped again
 	float howLongHasPassed = 0;		// This is how many frames it has passed since the piece was dropped once
 	int board_width = 10;
 	int board_height = 22;
-	uint8_t board[BOARD_WIDTH * BOARD_HEIGHT];			// because board_width * board_height won't work. TODO: fix this
+	//uint8_t board[BOARD_WIDTH * BOARD_HEIGHT];			// because board_width * board_height won't work. TODO: fix this
+	Block   board[BOARD_WIDTH * BOARD_HEIGHT];
 	// game methods
 	void DropPiece(Piece& piece);
 	void SoftDrop(Piece& piece);
 	void DrawTetromino(int x, int y, uint8_t width, Tetromino* tetromino, Color color);
 	void SetRandomPiece(Piece* piece);
-	void DrawBoard(uint8_t width, const uint8_t* board);
+	void DrawBoard(uint8_t width, const Block* board);
 	void DrawFPS();
-	void ClearLine(uint8_t* board);
+	void ClearLine(Block* board);
 	void SetGhostPiece(Piece* ghost_piece, Piece& copy_piece);
 	bool CheckCollision(Piece piece);
-	uint8_t GetMatrix(uint8_t* data, uint8_t width, uint8_t row, uint8_t col);
-	bool IsFullLine(uint8_t* board, uint8_t row);
-	void MoveLineDown(uint8_t* board, uint8_t row_limit);
-	void AddPieceToBoard(Piece& piece);
+	uint8_t GetMatrix(Block* board, uint8_t width, uint8_t row, uint8_t col);
+	bool IsFullLine(Block* board, uint8_t row);
+	void MoveLineDown(Block* board, uint8_t row_limit);
+	void AddPieceToBoard(Block *board, Piece& piece);
 	void ResetGame();
 	void ClearLines();
 	TTF_Font* font;

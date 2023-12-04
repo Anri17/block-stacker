@@ -10,3 +10,8 @@ struct Piece
 	Transform transform;
 	Tetromino piece;
 };
+
+struct Block {
+	uint8_t buf;
+	Color   color;
+};

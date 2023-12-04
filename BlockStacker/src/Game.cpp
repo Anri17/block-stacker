@@ -4,6 +4,7 @@
 #include "Common/Util.h"
 #include "Tetromino.h"
 
+
 enum Scenes {
 	MAIN_GAME = 0,
 	MAIN_MENU = 1,
@@ -15,10 +16,9 @@ Game::Game(std::string title, int windows_width, int windows_height) :
 {
 	game_scene = MAIN_MENU;
 
-	game_over = false;
+	srand(time(NULL)); // for Util::Random
 
-	current_piece = new Piece();
-	ghost_piece = new Piece();
+	game_over = false;
 
 	current_fps = 0;
 
@@ -56,7 +56,7 @@ void Game::Run()
 	Uint64 frameStart;
 	Uint64 frameTime;
 
-	SetRandomPiece(current_piece);
+	SetRandomPiece(&current_piece);
 
 	LOG_INFO("Start Loop")
 	while (!game_over)
@@ -70,7 +70,7 @@ void Game::Run()
 				game_over = true;
 			}
 
-			current_piece_copy = *current_piece;
+			current_piece_copy = current_piece;
 
 			if (e.type == SDL_KEYDOWN)
 			{
@@ -97,7 +97,7 @@ void Game::Run()
 						howLongHasPassed = 0;
 						break;
 					case SDLK_SPACE:
-						int lowestY = ghost_piece->transform.position.y;
+						int lowestY = ghost_piece.transform.position.y;
 						current_piece_copy.transform.position.y = lowestY;
 						howLongHasPassed = howLongToWait;
 						break;
@@ -138,7 +138,7 @@ void Game::Run()
 
 			if (!CheckCollision(current_piece_copy))
 			{
-				*current_piece = current_piece_copy;
+				current_piece = current_piece_copy;
 			}
 		}
 
@@ -162,25 +162,25 @@ void Game::Update()
 {
 	if (game_scene == MAIN_GAME)
 	{
-		SetGhostPiece(ghost_piece, *current_piece);
+		SetGhostPiece(&ghost_piece, current_piece);
 
-		Piece current_piece_copy = *current_piece;
+		Piece current_piece_copy = current_piece;
 		SoftDrop(current_piece_copy);
 
 		if (!CheckCollision(current_piece_copy))
 		{
-			*current_piece = current_piece_copy;
+			current_piece = current_piece_copy;
 		}
 		else
 		{
-			AddPieceToBoard(*current_piece);
+			AddPieceToBoard(board, current_piece);
 
 			// clear all existing lines
 			ClearLines();
 
-			SetRandomPiece(current_piece);
-			SetGhostPiece(ghost_piece, *current_piece);
-			if (CheckCollision(*current_piece)) game_scene = MAIN_MENU;		// since the new piece collides with the board, it's game over and the game ends
+			SetRandomPiece(&current_piece);
+			SetGhostPiece(&ghost_piece, current_piece);
+			if (CheckCollision(current_piece)) game_scene = MAIN_MENU;		// since the new piece collides with the board, it's game over and the game ends
 		}
 	}
 	// check if the piece is colliding with the bottom
@@ -195,9 +195,9 @@ void Game::Render()
 	if (game_scene == MAIN_GAME)
 	{
 		// draw ghost piece
-		DrawTetromino(ghost_piece->transform.position.x, ghost_piece->transform.position.y, 30, &ghost_piece->piece, ghost_piece->piece.GetColor());
+		DrawTetromino(ghost_piece.transform.position.x, ghost_piece.transform.position.y, 30, &ghost_piece.piece, ghost_piece.piece.GetColor());
 		// draw real piece
-		DrawTetromino(current_piece->transform.position.x, current_piece->transform.position.y, 30, &current_piece->piece, current_piece->piece.GetColor());
+		DrawTetromino(current_piece.transform.position.x, current_piece.transform.position.y, 30, &current_piece.piece, current_piece.piece.GetColor());
 		// draw board
 		DrawBoard(30, board);
 	}
@@ -276,22 +276,23 @@ void Game::SetRandomPiece(Piece* piece)
 	*piece = newPiece;
 }
 
-void Game::DrawBoard(uint8_t width, const uint8_t* board)
+void Game::DrawBoard(uint8_t width, const Block* board)
 {
 	for (uint8_t row = 0; row < board_height; row++)
 	{
 		for (uint8_t col = 0; col < board_width; col++)
 		{
-			uint8_t currentTetrominoBlock = board[row * board_width + col];
+			uint8_t currentTetrominoBlock = board[row * board_width + col].buf;
+			Color   currentColor = board[row * board_width + col].color;
 
 			if (currentTetrominoBlock == 0) continue;		// TODO: get rotation
 
 			int xPos = col * width;
 			int yPos = row * width + 2 * width;
 
-			Color color(255, 255, 255, 255);
+			//Color color(255, 255, 255, 255);
 
-			_renderer->DrawSquare(xPos, yPos, width, width, color);
+			_renderer->DrawSquare(xPos, yPos, width, width, currentColor);
 		}
 	}
 }
@@ -316,7 +317,7 @@ void Game::SetGhostPiece(Piece* ghost_piece, Piece& copy_piece)
 	Tetromino data = copy_piece.piece;
 
 	// change the color of the piece
-	data.GetColor() = Color::GREY;
+	data.SetColor(Color::GREY);
 
 	Piece gost_piece_copy(x, y, data);
 
@@ -364,18 +365,18 @@ bool Game::CheckCollision(Piece piece)
 	return false;
 }
 
-uint8_t Game::GetMatrix(uint8_t* data, uint8_t width, uint8_t row, uint8_t col)
+uint8_t Game::GetMatrix(Block* data, uint8_t width, uint8_t row, uint8_t col)
 {
-	return data[row * width + col];
+	return data[row * width + col].buf;
 }
 
-bool Game::IsFullLine(uint8_t* board, uint8_t row)
+bool Game::IsFullLine(Block* board, uint8_t row)
 {
 	bool is_full = true;
 
 	for (int col = 0; col < board_width; col++)
 	{
-		if (board[row * board_width + col] == 1)
+		if (board[row * board_width + col].buf == 1)
 		{
 			is_full = true;
 		}
@@ -389,7 +390,7 @@ bool Game::IsFullLine(uint8_t* board, uint8_t row)
 	return is_full;
 }
 
-void Game::ClearLine(uint8_t* board)
+void Game::ClearLine(Block* board)
 {
 	for (int row = 0; row < board_height; row++)
 	{
@@ -402,11 +403,11 @@ void Game::ClearLine(uint8_t* board)
 	// move everything above that row up to that line
 }
 
-void Game::MoveLineDown(uint8_t* board, uint8_t row_limit)
+void Game::MoveLineDown(Block* board, uint8_t row_limit)
 {
 	for (int col = 0; col < board_width; col++)
 	{
-		board[row_limit * board_width + col] = 0;
+		board[row_limit * board_width + col].buf = 0;
 	}
 
 	for (int row = row_limit; row > 0; row--)
@@ -418,7 +419,7 @@ void Game::MoveLineDown(uint8_t* board, uint8_t row_limit)
 	}
 }
 
-void Game::AddPieceToBoard(Piece& piece)
+void Game::AddPieceToBoard(Block *board, Piece& piece)
 {
 	Tetromino tetromino = piece.piece;
 	for (int row = 0; row < tetromino.GetSide(); row++)
@@ -429,7 +430,9 @@ void Game::AddPieceToBoard(Piece& piece)
 
 			if (block == 1)
 			{
- 				board[(row + piece.transform.position.y - 2) * board_width + (col + piece.transform.position.x)] = block;
+				board[(row + piece.transform.position.y - 2) * board_width + (col + piece.transform.position.x)].buf   = block;
+				board[(row + piece.transform.position.y - 2) * board_width + (col + piece.transform.position.x)].color = piece.piece.GetColor();
+
 			}
 		}
 	}
@@ -442,12 +445,13 @@ void Game::ResetGame()
 	{
 		for (int col = 0; col < BOARD_WIDTH; col++)
 		{
-			board[row * board_width + col] = 0;
+			board[row * board_width + col].buf = 0;
+			board[row * board_width + col].color = Color::BLACK;
 		}
 	}
 
 	// reset player piece position
-	SetRandomPiece(current_piece);
+	SetRandomPiece(&current_piece);
 	SetRandomPiece(&current_piece_copy);
 }
 
