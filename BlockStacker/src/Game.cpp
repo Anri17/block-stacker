@@ -162,6 +162,7 @@ void Game::Run()
 				}
 			}
 
+			// rotation
 			if (!CheckCollision(current_piece_copy))
 			{
 				current_piece = current_piece_copy;
@@ -173,8 +174,8 @@ void Game::Run()
 
 		frameTime = SDL_GetTicks() - frameStart;
 
-		if (frameDelay > frameTime)	// delay frame time
-		{
+		// delay frame time
+		if (frameDelay > frameTime)	{
 			SDL_Delay(frameDelay - (float)frameTime);
 		}
 
@@ -188,6 +189,7 @@ void Game::Update()
 {
 	SDL_GetMouseState(&mouse_x, &mouse_y);
 	if (game_scene == MAIN_MENU) {
+		// button
 		if (mouse_x >= button_quit.x && mouse_x <= button_quit.x + button_quit.w &&
 			mouse_y >= button_quit.y && mouse_y <= button_quit.y + button_quit.h) {
 			button_quit.is_hover = true;
@@ -333,12 +335,10 @@ void Game::DrawBoard(uint8_t width, const Block* board)
 			uint8_t currentTetrominoBlock = board[row * board_width + col].buf;
 			Color   currentColor = board[row * board_width + col].color;
 
-			if (currentTetrominoBlock == 0) continue;		// TODO: get rotation
+			if (currentTetrominoBlock == 0) continue;
 
 			int xPos = col * width;
 			int yPos = row * width + 2 * width;
-
-			//Color color(255, 255, 255, 255);
 
 			_renderer->DrawSquare(xPos, yPos, width, width, currentColor);
 		}
