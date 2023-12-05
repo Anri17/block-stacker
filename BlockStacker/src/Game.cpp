@@ -16,7 +16,7 @@ Game::Game(std::string title, int windows_width, int windows_height) :
 {
 	line_count = 0;
 	game_scene = MAIN_MENU;
-
+	has_stored_piece = false;
 	srand(time(NULL)); // for Util::Random
 
 	game_over = false;
@@ -93,6 +93,20 @@ void Game::Run()
 					{
 					case SDLK_ESCAPE:
 						game_scene = PAUSE_MENU;
+						break;
+					case SDLK_c:
+						if (!has_stored_piece) {
+							stored_piece = current_piece_copy;
+							SetRandomPiece(&current_piece_copy);
+							has_stored_piece = true;
+						} else {
+							Piece temp;
+							stored_piece.transform.position.x = current_piece_copy.transform.position.x;
+							stored_piece.transform.position.y = current_piece_copy.transform.position.y;
+							temp = stored_piece;
+							stored_piece = current_piece_copy;
+							current_piece_copy = temp;
+						}
 						break;
 					case SDLK_UP:
 						current_piece_copy.piece.rotation = (current_piece_copy.piece.rotation + 1) % 4;
@@ -220,6 +234,10 @@ void Game::Render()
 		DrawTetromino(current_piece.transform.position.x, current_piece.transform.position.y, 30, &current_piece.piece, current_piece.piece.GetColor());
 		// draw board
 		DrawBoard(30, board);
+		// stored piece
+		if (has_stored_piece) {
+			DrawTetromino(0, 0, 30, &stored_piece.piece, stored_piece.piece.GetColor());
+		}
 		_renderer->DrawText(10, 120, font, std::to_string(line_count), Color::WHITE);
 	}
 	else if (game_scene == MAIN_MENU)
@@ -479,7 +497,7 @@ void Game::ResetGame()
 			board[row * board_width + col].color = Color::BLACK;
 		}
 	}
-
+	has_stored_piece = false;
 	line_count = 0;
 	// reset player piece position
 	SetRandomPiece(&current_piece);

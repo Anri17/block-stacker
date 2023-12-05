@@ -74,4 +74,6 @@ private:
 	int game_scene;
 	Texture* testTexture;
 	Piece current_piece_copy;
+	Piece stored_piece;
+	bool has_stored_piece;
 };
