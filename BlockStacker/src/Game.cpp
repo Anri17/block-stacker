@@ -295,7 +295,7 @@ void Game::DrawTetromino(int x, int y, uint8_t width, Tetromino* tetromino, Colo
 void Game::SetRandomPiece(Piece* piece)
 {
 	int x = board_width / 2 - 1;
-	int y = 1;
+	int y = 2;
 
 	int randomIndex = Util::Random(7);
 
