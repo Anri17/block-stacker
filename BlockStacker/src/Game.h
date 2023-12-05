@@ -34,6 +34,7 @@ public:
 	~Game();
 	void Run();
 private:
+	int line_count;
 	// scene UI
 	Button button_quit;
 	int mouse_x, mouse_y;

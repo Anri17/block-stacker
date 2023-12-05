@@ -14,6 +14,7 @@ enum Scenes {
 Game::Game(std::string title, int windows_width, int windows_height) : 
 	Application(title, windows_width, windows_height)
 {
+	line_count = 0;
 	game_scene = MAIN_MENU;
 
 	srand(time(NULL)); // for Util::Random
@@ -219,6 +220,7 @@ void Game::Render()
 		DrawTetromino(current_piece.transform.position.x, current_piece.transform.position.y, 30, &current_piece.piece, current_piece.piece.GetColor());
 		// draw board
 		DrawBoard(30, board);
+		_renderer->DrawText(10, 120, font, std::to_string(line_count), Color::WHITE);
 	}
 	else if (game_scene == MAIN_MENU)
 	{
@@ -478,6 +480,7 @@ void Game::ResetGame()
 		}
 	}
 
+	line_count = 0;
 	// reset player piece position
 	SetRandomPiece(&current_piece);
 	SetRandomPiece(&current_piece_copy);
@@ -490,6 +493,7 @@ void Game::ClearLines()
 		if (IsFullLine(board, row))
 		{
 			MoveLineDown(board, row);
+			line_count++;
 		}
 	}
 	// remove lines at a certain row value
